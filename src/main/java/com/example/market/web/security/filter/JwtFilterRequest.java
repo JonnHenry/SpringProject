@@ -1,7 +1,7 @@
-package com.example.market.web.controller.security.filter;
+package com.example.market.web.security.filter;
 
-import com.example.market.domain.service.UserDetailService;
-import com.example.market.web.controller.security.JWTUtil;
+import com.example.market.domain.service.DataUserDetailService;
+import com.example.market.web.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,18 +23,18 @@ public class JwtFilterRequest extends OncePerRequestFilter { //Para filtrar la p
     private JWTUtil jwtUtil;
 
     @Autowired
-    private UserDetailService userDetailService;
+    private DataUserDetailService dataUserDetailService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authorzationHeader = request.getHeader("Authorization");
+        String authorizationHeader = request.getHeader("Authorization");
 
-        if (authorzationHeader !=null && authorzationHeader.startsWith("Bearer")) {
-            String jwt = authorzationHeader.substring(7);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer")) {
+            String jwt = authorizationHeader.substring(7);
             String username = jwtUtil.extractUsername(jwt);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailService.loadUserByUsername(username);
+                UserDetails userDetails = dataUserDetailService.loadUserByUsername(username);
 
                 if (jwtUtil.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -43,9 +43,9 @@ public class JwtFilterRequest extends OncePerRequestFilter { //Para filtrar la p
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-            filterChain.doFilter(request, response);
-
         }
+
+        filterChain.doFilter(request, response);
     }
 
 

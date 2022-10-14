@@ -2,8 +2,8 @@ package com.example.market.web.controller;
 
 import com.example.market.domain.dto.AuthenticationRequest;
 import com.example.market.domain.dto.AuthenticationResponse;
-import com.example.market.domain.service.UserDetailService;
-import com.example.market.web.controller.security.JWTUtil;
+import com.example.market.domain.service.DataUserDetailService;
+import com.example.market.web.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +24,20 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserDetailService userDetailService;
+    private DataUserDetailService dataUserDetailService;
 
     @Autowired
     private JWTUtil jwtUtil;
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> createToken(@RequestBody AuthenticationRequest request){
-        try{
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword()));
-            UserDetails userDetails = userDetailService.loadUserByUsername(request.getUsername());
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+            UserDetails userDetails = dataUserDetailService.loadUserByUsername(request.getUsername());
             String jwt = jwtUtil.generateToken(userDetails);
+
             return new ResponseEntity<>(new AuthenticationResponse(jwt), HttpStatus.OK);
-        }catch(BadCredentialsException e){
+        } catch (BadCredentialsException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
